@@ -7,6 +7,10 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import com.example.kdnex.fragment.CalculatorFragment
+import com.example.kdnex.fragment.CanvasFragment
+import com.example.kdnex.fragment.ClockFragment
+import com.example.kdnex.fragment.ImageManipulationFragment
 import com.google.android.material.navigation.NavigationView
 
 class MainActivity : AppCompatActivity() {
@@ -24,6 +28,7 @@ class MainActivity : AppCompatActivity() {
         left_navi = findViewById(R.id.left_navi)
 
         initDrawer()
+        replaceFragment(CalculatorFragment())
 
 
     }
