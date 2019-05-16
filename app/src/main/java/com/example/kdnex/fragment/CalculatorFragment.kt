@@ -41,14 +41,14 @@ class CalculatorFragment : Fragment() {
             val showText = textView?.text.toString()
 
             // 顯示為 0 並不點擊符號，邀免 0XXXX
-            if (isZero(showText) && !isSignal(clickedText)) {
+            if (isZero(showText) && !clickedText.isSignal()) {
                 textView?.text = clickedText
                 return@OnClickListener
             }
 
             // 等號顯示計算結果
             if (clickedText == "=") {
-                if (isSignal(showText)) {
+                if (showText.isSignal()) {
                     sum = previousNumber
                 } else if (operatorSignal == "" && previousNumber == 0.0) {
                     sum = showText.toDouble()
@@ -61,7 +61,7 @@ class CalculatorFragment : Fragment() {
 
             // 點擊運算符而目前顯示不是運算符，就儲存數字、符號
             if (clickedText == "+" || clickedText == "-" || clickedText == "*" || clickedText == "/") {
-                if (!isSignal(showText)) {
+                if (!showText.isSignal()) {
 
                     if (operatorSignal != "") {
                         previousNumber = sum
@@ -81,7 +81,7 @@ class CalculatorFragment : Fragment() {
             }
 
             val concatText: String
-            if (isSignal(showText) || isFinishing) {
+            if (showText.isSignal() || isFinishing) {
                 concatText = clickedText
                 isFinishing = false
             } else {
@@ -149,8 +149,9 @@ class CalculatorFragment : Fragment() {
         }
     }
 
-    fun isSignal(str: String): Boolean {
-        return str == "+" || str == "-" || str == "*" || str == "/" || str == "="
+
+    fun String.isSignal(): Boolean {
+        return this == "+" || this == "-" || this == "*" || this == "/" || this == "="
     }
 
     fun isNumeric(str: String): Boolean {
