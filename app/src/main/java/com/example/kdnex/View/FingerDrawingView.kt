@@ -73,8 +73,4 @@ class FingerDrawingView @JvmOverloads constructor(
     override fun performClick(): Boolean {
         return super.performClick()
     }
-
-    companion object {
-        const val TOUCH_TOLERANCE = 4
-    }
 }
