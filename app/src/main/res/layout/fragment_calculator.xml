@@ -13,10 +13,11 @@
     <TextView
         android:id="@+id/textView"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="wrap_content"
+        android:maxLines="100"
         android:text="0"
         android:textColor="@color/colorBlack"
-        android:textSize="60sp"
+        android:textSize="40sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -100,13 +101,13 @@
         android:layout_width="wrap_content"
         android:layout_height="60dp"
         android:text="6"
-        app:layout_constraintEnd_toStartOf="@id/btn_star"
+        app:layout_constraintEnd_toStartOf="@id/btn_multiply"
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintStart_toEndOf="@+id/btn_5"
         app:layout_constraintTop_toBottomOf="@+id/layer1Barrier" />
 
     <Button
-        android:id="@+id/btn_star"
+        android:id="@+id/btn_multiply"
         android:layout_width="wrap_content"
         android:layout_height="60dp"
         android:text="*"
@@ -120,7 +121,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="btn_4,btn_5,btn_6,btn_star" />
+        app:constraint_referenced_ids="btn_4,btn_5,btn_6,btn_multiply" />
 
     <Button
         android:id="@+id/btn_1"
@@ -214,7 +215,7 @@
         android:id="@+id/btn_equal"
         android:layout_width="wrap_content"
         android:layout_height="60dp"
-        android:text="-"
+        android:text="="
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintStart_toEndOf="@+id/btn_3"

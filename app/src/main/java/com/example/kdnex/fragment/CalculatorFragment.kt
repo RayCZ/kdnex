@@ -11,8 +11,12 @@ import com.example.kdnex.R
 
 class CalculatorFragment : Fragment() {
     var textView: TextView? = null
-    var num1: Int = 0
-    var num2: Int = 0
+    var sum: Int = 0
+
+    var isAfterSignal = false
+    var signalText = ""
+
+    var previousNumber = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -24,25 +28,67 @@ class CalculatorFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         textView = view.findViewById(R.id.textView)
+        textView?.text = "0"
         View.OnClickListener {
-
-            var nowText = ""
+            var nowClickedText = ""
             when (it.id) {
-                R.id.btn_0 -> nowText = "0"
-                R.id.btn_1 -> nowText = "1"
-                R.id.btn_2 -> nowText = "2"
-                R.id.btn_3 -> nowText = "3"
-                R.id.btn_star -> nowText = "*"
-                R.id.btn_clean -> nowText = "0"
-
+                R.id.btn_0 -> nowClickedText = "0"
+                R.id.btn_1 -> nowClickedText = "1"
+                R.id.btn_2 -> nowClickedText = "2"
+                R.id.btn_3 -> nowClickedText = "3"
+                R.id.btn_4 -> nowClickedText = "4"
+                R.id.btn_5 -> nowClickedText = "5"
+                R.id.btn_6 -> nowClickedText = "6"
+                R.id.btn_7 -> nowClickedText = "7"
+                R.id.btn_8 -> nowClickedText = "8"
+                R.id.btn_9 -> nowClickedText = "9"
+                R.id.btn_slash -> nowClickedText = "/"
+                R.id.btn_multiply -> nowClickedText = "*"
+                R.id.btn_minus -> nowClickedText = "-"
+                R.id.btn_plus -> nowClickedText = "+"
+                R.id.btn_clean -> {
+                    sum = 0
+                    textView?.text = "0"
+                    return@OnClickListener
+                }
             }
 
-            val previousText = textView?.text?.toString()
-            if (nowText == "/" || nowText == "*" || nowText == "-" || nowText == "+") {
+            val nowText = textView?.text.toString()
 
+            // concat numeric
+            if (!(nowClickedText == "+" || nowClickedText == "-" || nowClickedText == "*" || nowClickedText == "/" || nowClickedText == "=")) {
+                if (nowText == "0") {
+                    textView?.text = nowClickedText
+                } else {
+                    val concatText = nowText + nowClickedText
+                    textView?.text = concatText
+                }
+                return@OnClickListener
             }
 
-            textView?.text = nowText
+            if (nowClickedText == "+" || nowClickedText == "-" || nowClickedText == "*" || nowClickedText == "/") {
+                previousNumber = try {
+                    nowText.toInt()
+                } catch (exception: Exception) {
+                    0
+                }
+            }
+
+//            if (nowClickedText == "+" || nowClickedText == "-" || nowClickedText == "*" || nowClickedText == "/") {
+//                signalText = nowClickedText
+//
+//
+//                textView?.text = nowClickedText
+//                isAfterSignal = true
+//            } else if (nowClickedText == "=") {
+//                textView?.text = sum.toString()
+//                sum = 0
+//                isAfterSignal = false
+//            } else { // is clicked numeric
+//
+//            }
+
+
         }.let {
             var btn: Button? = view.findViewById(R.id.btn_0)
             btn?.setOnClickListener(it)
@@ -66,7 +112,7 @@ class CalculatorFragment : Fragment() {
             btn?.setOnClickListener(it)
             btn = view.findViewById(R.id.btn_slash)
             btn?.setOnClickListener(it)
-            btn = view.findViewById(R.id.btn_star)
+            btn = view.findViewById(R.id.btn_multiply)
             btn?.setOnClickListener(it)
             btn = view.findViewById(R.id.btn_minus)
             btn?.setOnClickListener(it)
