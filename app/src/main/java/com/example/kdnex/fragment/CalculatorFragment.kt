@@ -37,47 +37,62 @@ class CalculatorFragment : Fragment() {
         return str == "+" || str == "-" || str == "*" || str == "/" || str == "="
     }
 
+    fun isNumeric(str: String): Boolean {
+        return try {
+            str.toDouble()
+            true
+        } catch (exception: Exception) {
+            false
+        }
+    }
+
+    fun isZero(str: String): Boolean {
+        return try {
+            str.toDouble() == 0.0
+        } catch (exception: Exception) {
+            false
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         textView = view.findViewById(R.id.textView)
         textView?.text = "0"
+
+
         View.OnClickListener {
-            var clickedText = ""
-            when (it.id) {
-                R.id.btn_0 -> clickedText = "0"
-                R.id.btn_1 -> clickedText = "1"
-                R.id.btn_2 -> clickedText = "2"
-                R.id.btn_3 -> clickedText = "3"
-                R.id.btn_4 -> clickedText = "4"
-                R.id.btn_5 -> clickedText = "5"
-                R.id.btn_6 -> clickedText = "6"
-                R.id.btn_7 -> clickedText = "7"
-                R.id.btn_8 -> clickedText = "8"
-                R.id.btn_9 -> clickedText = "9"
-                R.id.btn_slash -> clickedText = "/"
-                R.id.btn_multiply -> clickedText = "*"
-                R.id.btn_minus -> clickedText = "-"
-                R.id.btn_plus -> clickedText = "+"
-                R.id.btn_equal -> clickedText = "="
-                R.id.btn_clean -> {
-                    previousNumber = 0.0
-                    operatorSignal = ""
-                    sum = 0.0
-                    isFinishing = false
-                    textView?.text = "0"
-                    return@OnClickListener
-                }
+            if (it.id == R.id.btn_clean) {
+                previousNumber = 0.0
+                operatorSignal = ""
+                sum = 0.0
+                isFinishing = false
+                textView?.text = "0"
+                return@OnClickListener
             }
 
-            // 判斷不是「0開頭」並且「不是符號」直接依點擊數字
-            var showText = textView?.text.toString()
-            val showTextDouble = try {
-                showText.toDouble()
-            } catch (exception: Exception) {
-                0.0
+            val clickedText = when (it.id) {
+                R.id.btn_0 -> "0"
+                R.id.btn_1 -> "1"
+                R.id.btn_2 -> "2"
+                R.id.btn_3 -> "3"
+                R.id.btn_4 -> "4"
+                R.id.btn_5 -> "5"
+                R.id.btn_6 -> "6"
+                R.id.btn_7 -> "7"
+                R.id.btn_8 -> "8"
+                R.id.btn_9 -> "9"
+                R.id.btn_slash -> "/"
+                R.id.btn_multiply -> "*"
+                R.id.btn_minus -> "-"
+                R.id.btn_plus -> "+"
+                R.id.btn_equal -> "="
+                else -> ""
             }
 
-            if (showTextDouble == 0.0 && !isSignal(showText) && clickedText != "=") {
+            val showText = textView?.text.toString()
+
+            // 顯示為 0 並不點擊符號，邀免 0XXXX
+            if (isZero(showText) && !isSignal(clickedText)) {
                 textView?.text = clickedText
                 return@OnClickListener
             }
@@ -86,11 +101,15 @@ class CalculatorFragment : Fragment() {
             if (clickedText == "=") {
                 operatorSignal = ""
 
-                sum = if (sum == 0.0) {
-                    showText.toDouble()
-                } else {
-                    sum
+                if (sum == 0.0) {
+                    if (isSignal(showText)) {
+                        sum = previousNumber
+                    } else {
+                        sum = showText.toDouble()
+                    }
+
                 }
+
                 textView?.text = sum.toString()
                 isFinishing = true
                 return@OnClickListener
