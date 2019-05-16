@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import com.example.kdnex.R
 
@@ -23,36 +24,6 @@ class CalculatorFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_calculator, container, false)
     }
 
-    fun calculateNumber(operator: String, num1: Double, numb2: Double): Double {
-        return when (operator) {
-            "+" -> (num1 + numb2)
-            "-" -> (num1 - numb2)
-            "*" -> (num1 * numb2)
-            "/" -> (num1 / numb2)
-            else -> 0.0
-        }
-    }
-
-    fun isSignal(str: String): Boolean {
-        return str == "+" || str == "-" || str == "*" || str == "/" || str == "="
-    }
-
-    fun isNumeric(str: String): Boolean {
-        return try {
-            str.toDouble()
-            true
-        } catch (exception: Exception) {
-            false
-        }
-    }
-
-    fun isZero(str: String): Boolean {
-        return try {
-            str.toDouble() == 0.0
-        } catch (exception: Exception) {
-            false
-        }
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -62,33 +33,11 @@ class CalculatorFragment : Fragment() {
 
         View.OnClickListener {
             if (it.id == R.id.btn_clean) {
-                previousNumber = 0.0
-                operatorSignal = ""
-                sum = 0.0
-                isFinishing = false
-                textView?.text = "0"
+                init()
                 return@OnClickListener
             }
 
-            val clickedText = when (it.id) {
-                R.id.btn_0 -> "0"
-                R.id.btn_1 -> "1"
-                R.id.btn_2 -> "2"
-                R.id.btn_3 -> "3"
-                R.id.btn_4 -> "4"
-                R.id.btn_5 -> "5"
-                R.id.btn_6 -> "6"
-                R.id.btn_7 -> "7"
-                R.id.btn_8 -> "8"
-                R.id.btn_9 -> "9"
-                R.id.btn_slash -> "/"
-                R.id.btn_multiply -> "*"
-                R.id.btn_minus -> "-"
-                R.id.btn_plus -> "+"
-                R.id.btn_equal -> "="
-                else -> ""
-            }
-
+            val clickedText = getClickedText(it.id)
             val showText = textView?.text.toString()
 
             // 顯示為 0 並不點擊符號，邀免 0XXXX
@@ -99,17 +48,12 @@ class CalculatorFragment : Fragment() {
 
             // 等號顯示計算結果
             if (clickedText == "=") {
-                operatorSignal = ""
-
-                if (sum == 0.0) {
-                    if (isSignal(showText)) {
-                        sum = previousNumber
-                    } else {
-                        sum = showText.toDouble()
-                    }
-
+                if (isSignal(showText)) {
+                    sum = previousNumber
+                } else if (operatorSignal == "" && previousNumber == 0.0) {
+                    sum = showText.toDouble()
                 }
-
+                operatorSignal = ""
                 textView?.text = sum.toString()
                 isFinishing = true
                 return@OnClickListener
@@ -148,39 +92,89 @@ class CalculatorFragment : Fragment() {
             sum = calculateNumber(operatorSignal, previousNumber, concatText.toDouble())
 
         }.let {
-            var btn: Button? = view.findViewById(R.id.btn_0)
-            btn?.setOnClickListener(it)
-            btn = view.findViewById(R.id.btn_1)
-            btn?.setOnClickListener(it)
-            btn = view.findViewById(R.id.btn_2)
-            btn?.setOnClickListener(it)
-            btn = view.findViewById(R.id.btn_3)
-            btn?.setOnClickListener(it)
-            btn = view.findViewById(R.id.btn_4)
-            btn?.setOnClickListener(it)
-            btn = view.findViewById(R.id.btn_5)
-            btn?.setOnClickListener(it)
-            btn = view.findViewById(R.id.btn_6)
-            btn?.setOnClickListener(it)
-            btn = view.findViewById(R.id.btn_7)
-            btn?.setOnClickListener(it)
-            btn = view.findViewById(R.id.btn_8)
-            btn?.setOnClickListener(it)
-            btn = view.findViewById(R.id.btn_9)
-            btn?.setOnClickListener(it)
-            btn = view.findViewById(R.id.btn_slash)
-            btn?.setOnClickListener(it)
-            btn = view.findViewById(R.id.btn_multiply)
-            btn?.setOnClickListener(it)
-            btn = view.findViewById(R.id.btn_minus)
-            btn?.setOnClickListener(it)
-            btn = view.findViewById(R.id.btn_plus)
-            btn?.setOnClickListener(it)
-            btn = view.findViewById(R.id.btn_equal)
-            btn?.setOnClickListener(it)
-            btn = view.findViewById(R.id.btn_clean)
-            btn?.setOnClickListener(it)
+            injectListener(view, R.id.btn_0, it)
+            injectListener(view, R.id.btn_1, it)
+            injectListener(view, R.id.btn_2, it)
+            injectListener(view, R.id.btn_3, it)
+            injectListener(view, R.id.btn_4, it)
+            injectListener(view, R.id.btn_5, it)
+            injectListener(view, R.id.btn_6, it)
+            injectListener(view, R.id.btn_7, it)
+            injectListener(view, R.id.btn_8, it)
+            injectListener(view, R.id.btn_9, it)
+            injectListener(view, R.id.btn_slash, it)
+            injectListener(view, R.id.btn_multiply, it)
+            injectListener(view, R.id.btn_minus, it)
+            injectListener(view, R.id.btn_plus, it)
+            injectListener(view, R.id.btn_equal, it)
+            injectListener(view, R.id.btn_clean, it)
         }
 
+    }
+
+    fun getClickedText(@IdRes id: Int): String {
+        return when (id) {
+            R.id.btn_0 -> "0"
+            R.id.btn_1 -> "1"
+            R.id.btn_2 -> "2"
+            R.id.btn_3 -> "3"
+            R.id.btn_4 -> "4"
+            R.id.btn_5 -> "5"
+            R.id.btn_6 -> "6"
+            R.id.btn_7 -> "7"
+            R.id.btn_8 -> "8"
+            R.id.btn_9 -> "9"
+            R.id.btn_slash -> "/"
+            R.id.btn_multiply -> "*"
+            R.id.btn_minus -> "-"
+            R.id.btn_plus -> "+"
+            R.id.btn_equal -> "="
+            else -> ""
+        }
+    }
+
+    fun injectListener(view: View, @IdRes id: Int, listener: View.OnClickListener) {
+        val btn: Button? = view.findViewById(id)
+        btn?.setOnClickListener(listener)
+    }
+
+
+    fun calculateNumber(operator: String, num1: Double, numb2: Double): Double {
+        return when (operator) {
+            "+" -> (num1 + numb2)
+            "-" -> (num1 - numb2)
+            "*" -> (num1 * numb2)
+            "/" -> (num1 / numb2)
+            else -> 0.0
+        }
+    }
+
+    fun isSignal(str: String): Boolean {
+        return str == "+" || str == "-" || str == "*" || str == "/" || str == "="
+    }
+
+    fun isNumeric(str: String): Boolean {
+        return try {
+            str.toDouble()
+            true
+        } catch (exception: Exception) {
+            false
+        }
+    }
+
+    fun isZero(str: String): Boolean {
+        return try {
+            str.toDouble() == 0.0
+        } catch (exception: Exception) {
+            false
+        }
+    }
+
+    fun init() {
+        previousNumber = 0.0
+        operatorSignal = ""
+        sum = 0.0
+        isFinishing = false
+        textView?.text = "0"
     }
 }
