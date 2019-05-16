@@ -11,12 +11,10 @@ import com.example.kdnex.R
 
 class CalculatorFragment : Fragment() {
     var textView: TextView? = null
-    var sum: Int = 0
-
-    var isAfterSignal = false
-    var signalText = ""
-
-    var previousNumber = 0
+    var sum: Double = 0.0
+    var previousNumber: Double = 0.0
+    var operatorSignal = ""
+    var isFinishing = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,69 +23,110 @@ class CalculatorFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_calculator, container, false)
     }
 
+    fun calculateNumber(operator: String, num1: Double, numb2: Double): Double {
+        return when (operator) {
+            "+" -> (num1 + numb2)
+            "-" -> (num1 - numb2)
+            "*" -> (num1 * numb2)
+            "/" -> (num1 / numb2)
+            else -> 0.0
+        }
+    }
+
+    fun isSignal(str: String): Boolean {
+        return str == "+" || str == "-" || str == "*" || str == "/" || str == "="
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         textView = view.findViewById(R.id.textView)
         textView?.text = "0"
         View.OnClickListener {
-            var nowClickedText = ""
+            var clickedText = ""
             when (it.id) {
-                R.id.btn_0 -> nowClickedText = "0"
-                R.id.btn_1 -> nowClickedText = "1"
-                R.id.btn_2 -> nowClickedText = "2"
-                R.id.btn_3 -> nowClickedText = "3"
-                R.id.btn_4 -> nowClickedText = "4"
-                R.id.btn_5 -> nowClickedText = "5"
-                R.id.btn_6 -> nowClickedText = "6"
-                R.id.btn_7 -> nowClickedText = "7"
-                R.id.btn_8 -> nowClickedText = "8"
-                R.id.btn_9 -> nowClickedText = "9"
-                R.id.btn_slash -> nowClickedText = "/"
-                R.id.btn_multiply -> nowClickedText = "*"
-                R.id.btn_minus -> nowClickedText = "-"
-                R.id.btn_plus -> nowClickedText = "+"
+                R.id.btn_0 -> clickedText = "0"
+                R.id.btn_1 -> clickedText = "1"
+                R.id.btn_2 -> clickedText = "2"
+                R.id.btn_3 -> clickedText = "3"
+                R.id.btn_4 -> clickedText = "4"
+                R.id.btn_5 -> clickedText = "5"
+                R.id.btn_6 -> clickedText = "6"
+                R.id.btn_7 -> clickedText = "7"
+                R.id.btn_8 -> clickedText = "8"
+                R.id.btn_9 -> clickedText = "9"
+                R.id.btn_slash -> clickedText = "/"
+                R.id.btn_multiply -> clickedText = "*"
+                R.id.btn_minus -> clickedText = "-"
+                R.id.btn_plus -> clickedText = "+"
+                R.id.btn_equal -> clickedText = "="
                 R.id.btn_clean -> {
-                    sum = 0
+                    previousNumber = 0.0
+                    operatorSignal = ""
+                    sum = 0.0
+                    isFinishing = false
                     textView?.text = "0"
                     return@OnClickListener
                 }
             }
 
-            val nowText = textView?.text.toString()
+            // 判斷不是「0開頭」並且「不是符號」直接依點擊數字
+            var showText = textView?.text.toString()
+            val showTextDouble = try {
+                showText.toDouble()
+            } catch (exception: Exception) {
+                0.0
+            }
 
-            // concat numeric
-            if (!(nowClickedText == "+" || nowClickedText == "-" || nowClickedText == "*" || nowClickedText == "/" || nowClickedText == "=")) {
-                if (nowText == "0") {
-                    textView?.text = nowClickedText
-                } else {
-                    val concatText = nowText + nowClickedText
-                    textView?.text = concatText
-                }
+            if (showTextDouble == 0.0 && !isSignal(showText) && clickedText != "=") {
+                textView?.text = clickedText
                 return@OnClickListener
             }
 
-            if (nowClickedText == "+" || nowClickedText == "-" || nowClickedText == "*" || nowClickedText == "/") {
-                previousNumber = try {
-                    nowText.toInt()
-                } catch (exception: Exception) {
-                    0
+            // 等號顯示計算結果
+            if (clickedText == "=") {
+                operatorSignal = ""
+
+                sum = if (sum == 0.0) {
+                    showText.toDouble()
+                } else {
+                    sum
                 }
+                textView?.text = sum.toString()
+                isFinishing = true
+                return@OnClickListener
             }
 
-//            if (nowClickedText == "+" || nowClickedText == "-" || nowClickedText == "*" || nowClickedText == "/") {
-//                signalText = nowClickedText
-//
-//
-//                textView?.text = nowClickedText
-//                isAfterSignal = true
-//            } else if (nowClickedText == "=") {
-//                textView?.text = sum.toString()
-//                sum = 0
-//                isAfterSignal = false
-//            } else { // is clicked numeric
-//
-//            }
+            // 點擊運算符而目前顯示不是運算符，就儲存數字、符號
+            if (clickedText == "+" || clickedText == "-" || clickedText == "*" || clickedText == "/") {
+                if (!isSignal(showText)) {
 
+                    if (operatorSignal != "") {
+                        previousNumber = sum
+                    } else {
+                        previousNumber = try {
+                            showText.toDouble()
+                        } catch (exception: Exception) {
+                            0.0
+                        }
+                    }
+
+                }
+
+                operatorSignal = clickedText
+                textView?.text = operatorSignal
+                return@OnClickListener
+            }
+
+            val concatText: String
+            if (isSignal(showText) || isFinishing) {
+                concatText = clickedText
+                isFinishing = false
+            } else {
+                concatText = showText + clickedText
+            }
+            textView?.text = concatText
+
+            sum = calculateNumber(operatorSignal, previousNumber, concatText.toDouble())
 
         }.let {
             var btn: Button? = view.findViewById(R.id.btn_0)
