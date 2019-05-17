@@ -7,16 +7,15 @@ import android.view.MotionEvent
 import android.view.View
 
 class FingerDrawingView @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
     private val path: Path
     private val pathPaint: Paint
     private val backgroundPaint: Paint
-
-
     private var backdroundCanvas: Canvas? = null
     private var backgroundBitmap: Bitmap? = null
-
 
     init {
         path = Path()
@@ -48,7 +47,6 @@ class FingerDrawingView @JvmOverloads constructor(
         }
     }
 
-
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -66,7 +64,6 @@ class FingerDrawingView @JvmOverloads constructor(
                 invalidate()
             }
         }
-
         return true
     }
 
