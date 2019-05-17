@@ -110,13 +110,8 @@ class ImageManipulationFragment : Fragment() {
 
         val rotation = rotation(event)
         val delta = rotation - mRotation
-        mRotation += delta
         view.rotation = delta
         return true
-    }
-
-    companion object {
-        const val PICK_IMAGE = 125
     }
 
     private fun rotation(event: MotionEvent): Float {
@@ -125,5 +120,10 @@ class ImageManipulationFragment : Fragment() {
         val radians = Math.atan2(delta_y, delta_x)
         return Math.toDegrees(radians).toFloat()
     }
+
+    companion object {
+        const val PICK_IMAGE = 125
+    }
+
 
 }
