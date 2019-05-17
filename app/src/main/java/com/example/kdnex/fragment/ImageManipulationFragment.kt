@@ -1,24 +1,27 @@
 package com.example.kdnex.fragment
 
-import android.annotation.TargetApi
+import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import androidx.fragment.app.Fragment
 
 
 class ImageManipulationFragment : Fragment() {
     var btn_loadimage: Button? = null
     var btn_clear: Button? = null
-    var image: ImageView? = null
+    var imageView: ImageView? = null
+    var dx: Float = 0.toFloat()
+    var dy: Float = 0.toFloat()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,16 +30,41 @@ class ImageManipulationFragment : Fragment() {
         return inflater.inflate(com.example.kdnex.R.layout.fragment_image_manipulation, container, false)
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         btn_loadimage = view.findViewById(com.example.kdnex.R.id.btn_loadimage)
         btn_clear = view.findViewById(com.example.kdnex.R.id.btn_clear)
-        image = view.findViewById(com.example.kdnex.R.id.image)
+        imageView = view.findViewById(com.example.kdnex.R.id.imageView)
+
+        imageView?.setOnTouchListener { v, event ->
+            when (event?.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    val layoutPara: RelativeLayout.LayoutParams = v.layoutParams as RelativeLayout.LayoutParams
+                    dx = event.rawX - layoutPara.leftMargin
+                    dy = event.rawY - layoutPara.topMargin
+                }
+
+                MotionEvent.ACTION_MOVE -> {
+                    val layoutPara: RelativeLayout.LayoutParams = v.layoutParams as RelativeLayout.LayoutParams
+                    layoutPara.leftMargin = (event.rawX - dx).toInt()
+                    layoutPara.topMargin = (event.rawY - dy).toInt()
+                    layoutPara.rightMargin = 0
+                    layoutPara.bottomMargin = 0
+                    v.layoutParams = layoutPara
+                }
+
+                MotionEvent.ACTION_UP -> {
+
+                }
+            }
+            view.invalidate()
+            return@setOnTouchListener true
+        }
 
         btn_clear?.setOnClickListener {
-            image?.setImageResource(0)
+            imageView?.setImageResource(0)
         }
 
         btn_loadimage?.setOnClickListener {
@@ -47,6 +75,7 @@ class ImageManipulationFragment : Fragment() {
             }
             startActivityForResult(Intent.createChooser(intent, "selection picture"), PICK_IMAGE)
         }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -55,7 +84,7 @@ class ImageManipulationFragment : Fragment() {
         try {
             if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
                 val uri: Uri? = data?.data
-                image?.setImageURI(uri)
+                imageView?.setImageURI(uri)
             }
         } catch (e: Exception) {
             Log.e("FileSelectorActivity", "File select error", e)
@@ -66,4 +95,5 @@ class ImageManipulationFragment : Fragment() {
     companion object {
         const val PICK_IMAGE = 125
     }
+
 }
