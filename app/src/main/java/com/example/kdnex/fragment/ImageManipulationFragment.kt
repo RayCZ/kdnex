@@ -30,6 +30,7 @@ class ImageManipulationFragment : Fragment() {
         return inflater.inflate(com.example.kdnex.R.layout.fragment_image_manipulation, container, false)
     }
 
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -39,27 +40,15 @@ class ImageManipulationFragment : Fragment() {
         imageView = view.findViewById(com.example.kdnex.R.id.imageView)
 
         imageView?.setOnTouchListener { v, event ->
-            when (event?.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    val layoutPara: RelativeLayout.LayoutParams = v.layoutParams as RelativeLayout.LayoutParams
-                    dx = event.rawX - layoutPara.leftMargin
-                    dy = event.rawY - layoutPara.topMargin
-                }
-
-                MotionEvent.ACTION_MOVE -> {
-                    val layoutPara: RelativeLayout.LayoutParams = v.layoutParams as RelativeLayout.LayoutParams
-                    layoutPara.leftMargin = (event.rawX - dx).toInt()
-                    layoutPara.topMargin = (event.rawY - dy).toInt()
-                    layoutPara.rightMargin = 0
-                    layoutPara.bottomMargin = 0
-                    v.layoutParams = layoutPara
-                }
-
-                MotionEvent.ACTION_UP -> {
-
-                }
+            if (event.pointerCount == 1) {
+                moveView(v, event)
+                view.invalidate()
             }
-            view.invalidate()
+
+            if (event.pointerCount >= 2) {
+                doRotationEvent(v, event)
+            }
+
             return@setOnTouchListener true
         }
 
@@ -92,8 +81,49 @@ class ImageManipulationFragment : Fragment() {
 
     }
 
+
+    fun moveView(view: View, event: MotionEvent?) {
+        when (event?.action) {
+            MotionEvent.ACTION_DOWN -> {
+                val layoutPara: RelativeLayout.LayoutParams = view.layoutParams as RelativeLayout.LayoutParams
+                dx = event.rawX - layoutPara.leftMargin
+                dy = event.rawY - layoutPara.topMargin
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                val layoutPara: RelativeLayout.LayoutParams = view.layoutParams as RelativeLayout.LayoutParams
+                layoutPara.leftMargin = (event.rawX - dx).toInt()
+                layoutPara.topMargin = (event.rawY - dy).toInt()
+                layoutPara.rightMargin = 0
+                layoutPara.bottomMargin = 0
+                view.layoutParams = layoutPara
+            }
+        }
+    }
+
+    var mRotation: Float = 0.toFloat()
+
+    private fun doRotationEvent(view: View, event: MotionEvent): Boolean {
+        if (event.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN) {
+            mRotation = rotation(event)
+        }
+
+        val rotation = rotation(event)
+        val delta = rotation - mRotation
+        mRotation += delta
+        view.rotation = delta
+        return true
+    }
+
     companion object {
         const val PICK_IMAGE = 125
+    }
+
+    private fun rotation(event: MotionEvent): Float {
+        val delta_x = (event.getX(0) - event.getX(1)).toDouble()
+        val delta_y = (event.getY(0) - event.getY(1)).toDouble()
+        val radians = Math.atan2(delta_y, delta_x)
+        return Math.toDegrees(radians).toFloat()
     }
 
 }
