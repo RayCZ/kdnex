@@ -39,19 +39,6 @@ class ImageManipulationFragment : Fragment() {
         btn_clear = view.findViewById(com.example.kdnex.R.id.btn_clear)
         imageView = view.findViewById(com.example.kdnex.R.id.imageView)
 
-        imageView?.setOnTouchListener { v, event ->
-            if (event.pointerCount == 1) {
-                moveView(v, event)
-                view.invalidate()
-            }
-
-            if (event.pointerCount >= 2) {
-                doRotationEvent(v, event)
-            }
-
-            return@setOnTouchListener true
-        }
-
         btn_clear?.setOnClickListener {
             imageView?.setImageResource(0)
         }
@@ -65,20 +52,18 @@ class ImageManipulationFragment : Fragment() {
             startActivityForResult(Intent.createChooser(intent, "selection picture"), PICK_IMAGE)
         }
 
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        try {
-            if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
-                val uri: Uri? = data?.data
-                imageView?.setImageURI(uri)
+        imageView?.setOnTouchListener { v, event ->
+            if (event.pointerCount == 1) {
+                moveView(v, event)
             }
-        } catch (e: Exception) {
-            Log.e("FileSelectorActivity", "File select error", e)
-        }
 
+            if (event.pointerCount == 2) {
+                rotateView(v, event)
+            }
+            v.invalidate()
+
+            return@setOnTouchListener true
+        }
     }
 
 
@@ -101,17 +86,24 @@ class ImageManipulationFragment : Fragment() {
         }
     }
 
+
     var mRotation: Float = 0.toFloat()
+    fun rotateView(v: View, event: MotionEvent?) {
+        when (event?.actionMasked) {
+            MotionEvent.ACTION_POINTER_DOWN -> {
+                mRotation = rotation(event)
+            }
 
-    private fun doRotationEvent(view: View, event: MotionEvent): Boolean {
-        if (event.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN) {
-            mRotation = rotation(event)
+            MotionEvent.ACTION_MOVE -> {
+                val rotation = rotation(event)
+                val delta = rotation - mRotation
+                if (delta > 0) {
+                    v.rotation += 5
+                } else {
+                    v.rotation -= 5
+                }
+            }
         }
-
-        val rotation = rotation(event)
-        val delta = rotation - mRotation
-        view.rotation = delta
-        return true
     }
 
     private fun rotation(event: MotionEvent): Float {
@@ -119,6 +111,20 @@ class ImageManipulationFragment : Fragment() {
         val delta_y = (event.getY(0) - event.getY(1)).toDouble()
         val radians = Math.atan2(delta_y, delta_x)
         return Math.toDegrees(radians).toFloat()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        try {
+            if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
+                val uri: Uri? = data?.data
+                imageView?.setImageURI(uri)
+            }
+        } catch (e: Exception) {
+            Log.e("FileSelectorActivity", "File select error", e)
+        }
+
     }
 
     companion object {
